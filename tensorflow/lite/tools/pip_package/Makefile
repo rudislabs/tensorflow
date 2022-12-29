@@ -15,11 +15,18 @@
 # Values: debian:<version>, ubuntu:<version>
 BASE_IMAGE ?= ubuntu:18.04
 PYTHON_VERSION ?= 3.9
+
 # Values: rpi, aarch64, native
 TENSORFLOW_TARGET ?= native
 WHEEL_PROJECT_NAME ?= tflite_runtime
 # Values: according to https://www.python.org/dev/peps/pep-0440/
 VERSION_SUFFIX ?=
+
+ifeq ($(PYTHON_VERSION), 3.10)
+	NUMPY_VERSION ?= 1.21.5
+else
+	NUMPY_VERSION ?= 1.19.2
+endif
 
 MAKEFILE_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 TENSORFLOW_DIR := $(MAKEFILE_DIR)/../../../..
@@ -53,7 +60,7 @@ help:
 	@echo "make clean        -- remove wheel and deb files"
 
 docker-image:
-	docker build -t $(TAG_IMAGE) --build-arg IMAGE=$(BASE_IMAGE) --build-arg PYTHON_VERSION=$(PYTHON_VERSION) -f $(MAKEFILE_DIR)/Dockerfile.py3 $(MAKEFILE_DIR)/.
+	docker build -t $(TAG_IMAGE) --build-arg IMAGE=$(BASE_IMAGE) --build-arg PYTHON_VERSION=$(PYTHON_VERSION) --build-arg NUMPY_VERSION=$(NUMPY_VERSION) -f $(MAKEFILE_DIR)/Dockerfile.py3 $(MAKEFILE_DIR)/.
 
 docker-shell: docker-image
 	mkdir -p $(TENSORFLOW_DIR)/bazel-ci_build-cache

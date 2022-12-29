@@ -15,6 +15,8 @@
 ARG IMAGE
 FROM ${IMAGE}
 ARG PYTHON_VERSION
+ARG NUMPY_VERSION
+ENV DEBIAN_FRONTEND noninteractive
 
 COPY update_sources.sh /
 RUN /update_sources.sh
@@ -29,7 +31,7 @@ RUN apt-get update && \
       git && \
     apt-get clean
 
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends tzdata
 # Install Python packages.
 RUN dpkg --add-architecture armhf
 RUN dpkg --add-architecture arm64
@@ -48,7 +50,7 @@ RUN curl -OL https://bootstrap.pypa.io/get-pip.py
 RUN python3 get-pip.py
 RUN rm get-pip.py
 RUN pip3 install --upgrade pip
-RUN pip3 install numpy~=1.19.2 setuptools pybind11
+RUN pip3 install numpy~=$NUMPY_VERSION setuptools pybind11
 RUN ln -sf /usr/include/python$PYTHON_VERSION /usr/include/python3
 RUN ln -sf /usr/local/lib/python$PYTHON_VERSION/dist-packages/numpy/core/include/numpy /usr/include/python3/numpy
 RUN curl -OL https://github.com/Kitware/CMake/releases/download/v3.16.8/cmake-3.16.8-Linux-x86_64.sh
