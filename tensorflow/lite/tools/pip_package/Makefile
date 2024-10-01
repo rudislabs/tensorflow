@@ -13,12 +13,12 @@
 # limitations under the License.
 
 # Values: debian:<version>, ubuntu:<version>
-BASE_IMAGE ?= ubuntu:20.04
-PYTHON_VERSION ?= 3.11
-NUMPY_VERSION ?= 1.23.2
+BASE_IMAGE ?= ubuntu:24.04
+PYTHON_VERSION ?= 3.12
+NUMPY_VERSION ?= 1.26.4
 
 # Values: rpi, aarch64, native
-TENSORFLOW_TARGET ?= native
+TENSORFLOW_TARGET ?= aarch64
 WHEEL_PROJECT_NAME ?= tflite_runtime
 # Values: according to https://www.python.org/dev/peps/pep-0440/
 VERSION_SUFFIX ?=

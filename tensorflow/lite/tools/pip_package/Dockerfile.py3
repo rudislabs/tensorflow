@@ -13,7 +13,8 @@
 # limitations under the License.
 
 ARG IMAGE
-FROM ${IMAGE}
+FROM ubuntu:24.04 
+RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel -r ubuntu
 ARG PYTHON_VERSION
 ARG NUMPY_VERSION
 
@@ -36,6 +37,27 @@ RUN apt-get update && \
 RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.15.0/bazelisk-linux-amd64 \
   -O /usr/local/bin/bazel && chmod +x /usr/local/bin/bazel
 
+RUN echo '\
+Types: deb\n\
+Architectures: amd64\n\
+URIs: http://us.archive.ubuntu.com/ubuntu/\n\
+Suites: noble noble-updates noble-backports\n\
+Components: main restricted universe multiverse\n\
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n\n\
+Types: deb\n\
+Architectures: amd64\n\
+URIs: http://security.ubuntu.com/ubuntu/\n\
+Suites: noble-security\n\
+Components: main restricted universe multiverse\n\
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n\n\
+Types: deb\n\
+Architectures: arm64 armhf\n\
+URIs: http://ports.ubuntu.com/ubuntu-ports\n\
+Suites: noble noble-updates noble-backports noble-security\n\
+Components: main restricted universe multiverse\n\
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\
+' > /etc/apt/sources.list.d/ubuntu.sources
+
 # Install Python packages.
 RUN dpkg --add-architecture armhf
 RUN dpkg --add-architecture arm64
@@ -45,16 +67,17 @@ RUN apt-get update && \
       python$PYTHON_VERSION \
       python$PYTHON_VERSION-dev \
       python$PYTHON_VERSION-venv \
-      python$PYTHON_VERSION-distutils \
+      python3-setuptools \
       libpython$PYTHON_VERSION-dev \
       libpython$PYTHON_VERSION-dev:armhf \
       libpython$PYTHON_VERSION-dev:arm64
 RUN ln -sf /usr/bin/python$PYTHON_VERSION /usr/bin/python3
 RUN curl -OL https://bootstrap.pypa.io/get-pip.py
-RUN python3 get-pip.py
+RUN python3 get-pip.py --break-system-packages
 RUN rm get-pip.py
-RUN pip3 install --upgrade pip
-RUN pip3 install numpy~=$NUMPY_VERSION setuptools pybind11
+RUN pip3 install --upgrade pip --break-system-packages
+RUN pip3 install wheel --break-system-packages
+RUN pip3 install numpy~=$NUMPY_VERSION setuptools pybind11 --break-system-packages
 RUN ln -sf /usr/include/python$PYTHON_VERSION /usr/include/python3
 RUN ln -sf /usr/local/lib/python$PYTHON_VERSION/dist-packages/numpy/core/include/numpy /usr/include/python3/numpy
 RUN curl -OL https://github.com/Kitware/CMake/releases/download/v3.16.8/cmake-3.16.8-Linux-x86_64.sh
